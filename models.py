@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
-from typing import List, Optional
+from typing import Iterable, List, Optional
 from uuid import UUID, uuid4
 
 
@@ -40,6 +40,38 @@ class Item:
 
     def update_popularity(self, delta: int) -> None:
         self.popularity = max(0, self.popularity + delta)
+
+
+# --- Catalog helpers (filtering + sorting) ----------------------------------
+
+def filter_items_by_category(items: Iterable[Item], category: str) -> List[Item]:
+    return [item for item in items if item.category == category]
+
+
+def filter_items_by_price_range(
+    items: Iterable[Item], min_price: Decimal, max_price: Decimal
+) -> List[Item]:
+    return [
+        item
+        for item in items
+        if min_price <= item.price <= max_price
+    ]
+
+
+def filter_items_by_popularity(items: Iterable[Item], min_popularity: int) -> List[Item]:
+    return [item for item in items if item.popularity >= min_popularity]
+
+
+def sort_items_by_price(items: Iterable[Item], ascending: bool = True) -> List[Item]:
+    return sorted(items, key=lambda item: item.price, reverse=not ascending)
+
+
+def sort_items_by_popularity(items: Iterable[Item], ascending: bool = False) -> List[Item]:
+    return sorted(items, key=lambda item: item.popularity, reverse=not ascending)
+
+
+def sort_items_by_name(items: Iterable[Item], ascending: bool = True) -> List[Item]:
+    return sorted(items, key=lambda item: item.name.lower(), reverse=not ascending)
 
 
 @dataclass
@@ -139,3 +171,4 @@ class Customer:
 
     def has_purchase_history(self) -> bool:
         return self.purchase_history.has_transactions()
+
